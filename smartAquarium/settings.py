@@ -82,7 +82,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'TemperatureManag$smartaquarium_db',
         'USER': 'TemperatureManag',
-        'PASSWORD': 'THARINI@123.',
+        'PASSWORD': 'janidu@123',
         'HOST': 'TemperatureManagement.mysql.pythonanywhere-services.com',
         'PORT': '3306',
     }
