@@ -82,9 +82,12 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'TemperatureManag$smartaquarium_db',
         'USER': 'TemperatureManag',
-        'PASSWORD': 'your_password_here',  # UPDATE WITH YOUR PYTHONANYWHERE PASSWORD
+        'PASSWORD': 'THARINI%40123%2E',  # URL-encoded: THARINI@123.
         'HOST': 'TemperatureManagement.mysql.pythonanywhere-services.com',
         'PORT': '3306',
+        'OPTIONS': {
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
+        }
     }
 }
 
