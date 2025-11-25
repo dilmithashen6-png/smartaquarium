@@ -80,10 +80,10 @@ WSGI_APPLICATION = 'smartAquarium.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'smartaquarium_db',
-        'USER': 'root',
-        'PASSWORD': 'your_password_here',
-        'HOST': 'localhost',
+        'NAME': 'TemperatureManag$smartaquarium_db',
+        'USER': 'TemperatureManag',
+        'PASSWORD': 'your_password_here',  # UPDATE WITH YOUR PYTHONANYWHERE PASSWORD
+        'HOST': 'TemperatureManagement.mysql.pythonanywhere-services.com',
         'PORT': '3306',
     }
 }
