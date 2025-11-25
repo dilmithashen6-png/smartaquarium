@@ -1,0 +1,233 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Dashboard - Smart Aquarium</title>
+  <link rel="stylesheet" type="text/css" href="{% static 'css/dashboard.css' %}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="dashboard-container">
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+      <div class="navbar-content">
+        <h1 class="navbar-title">🐟 Smart Aquarium Control</h1>
+        <ul class="navbar-menu">
+          <li><a href="{% url 'admin_dashboard' %}" class="active">Dashboard</a></li>
+          <li><a href="{% url 'data_history' %}">History</a></li>
+          <li><a href="{% url 'logout' %}">Logout</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <div class="page-header">
+        <h2>Admin Control Panel</h2>
+        <p class="welcome-text">Welcome, <strong>{{ user.username }}</strong></p>
+      </div>
+
+      <!-- Status Section -->
+      <div class="status-section">
+        <h3>📊 Current Status</h3>
+        
+        <div class="status-grid">
+          <!-- Temperature Card -->
+          <div class="status-card temperature">
+            <div class="card-icon">🌡️</div>
+            <div class="card-content">
+              <h4>Temperature</h4>
+              {% if latest_sensor %}
+                <p class="value">{{ latest_sensor.temperature }}°C</p>
+                <p class="timestamp">{{ latest_sensor.timestamp|date:"M d, Y H:i" }}</p>
+              {% else %}
+                <p class="value">--</p>
+                <p class="timestamp">No data</p>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Humidity Card -->
+          <div class="status-card humidity">
+            <div class="card-icon">💧</div>
+            <div class="card-content">
+              <h4>Humidity</h4>
+              {% if latest_sensor %}
+                <p class="value">{{ latest_sensor.humidity }}%</p>
+                <p class="timestamp">{{ latest_sensor.timestamp|date:"M d, Y H:i" }}</p>
+              {% else %}
+                <p class="value">--</p>
+                <p class="timestamp">No data</p>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Fan Status Card -->
+          <div class="status-card device-card">
+            <div class="card-icon">💨</div>
+            <div class="card-content">
+              <h4>Fan</h4>
+              {% for device in devices %}
+                {% if device.device == 'fan' %}
+                  <p class="value {% if device.is_on %}on{% else %}off{% endif %}">
+                    {% if device.is_on %}ON{% else %}OFF{% endif %}
+                  </p>
+                {% endif %}
+              {% empty %}
+                <p class="value off">OFF</p>
+              {% endfor %}
+            </div>
+          </div>
+
+          <!-- Heater Status Card -->
+          <div class="status-card device-card">
+            <div class="card-icon">🔥</div>
+            <div class="card-content">
+              <h4>Heater</h4>
+              {% for device in devices %}
+                {% if device.device == 'heater' %}
+                  <p class="value {% if device.is_on %}on{% else %}off{% endif %}">
+                    {% if device.is_on %}ON{% else %}OFF{% endif %}
+                  </p>
+                {% endif %}
+              {% empty %}
+                <p class="value off">OFF</p>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Control Section -->
+      <div class="control-section">
+        <h3>🎮 Device Control</h3>
+        
+        <div class="control-grid">
+          <!-- Setpoint Control -->
+          <div class="control-card">
+            <h4>Temperature Setpoint</h4>
+            <div class="setpoint-control">
+              {% if setpoint %}
+                <input type="number" id="setpoint-input" value="{{ setpoint.setpoint_temperature }}" step="0.1" min="15" max="35">
+              {% else %}
+                <input type="number" id="setpoint-input" value="25.0" step="0.1" min="15" max="35">
+              {% endif %}
+              <span class="unit">°C</span>
+              <button class="btn btn-primary" onclick="updateSetpoint()">Update</button>
+            </div>
+            <p class="info-text">Set target temperature (15°C - 35°C)</p>
+          </div>
+
+          <!-- Fan Control -->
+          <div class="control-card">
+            <h4>Fan Control</h4>
+            <div class="device-buttons">
+              <button class="btn btn-danger" onclick="controlDevice('fan', 'on')">Turn ON</button>
+              <button class="btn btn-secondary" onclick="controlDevice('fan', 'off')">Turn OFF</button>
+            </div>
+          </div>
+
+          <!-- Heater Control -->
+          <div class="control-card">
+            <h4>Heater Control</h4>
+            <div class="device-buttons">
+              <button class="btn btn-warning" onclick="controlDevice('heater', 'on')">Turn ON</button>
+              <button class="btn btn-secondary" onclick="controlDevice('heater', 'off')">Turn OFF</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Statistics Section -->
+      <div class="stats-section">
+        <h3>📈 Statistics</h3>
+        <div class="stats-grid">
+          <div class="stat-item">
+            <label>Average Temp (24h)</label>
+            <p class="stat-value">--°C</p>
+          </div>
+          <div class="stat-item">
+            <label>Max Temp (24h)</label>
+            <p class="stat-value">--°C</p>
+          </div>
+          <div class="stat-item">
+            <label>Min Temp (24h)</label>
+            <p class="stat-value">--°C</p>
+          </div>
+          <div class="stat-item">
+            <label>Data Points (24h)</label>
+            <p class="stat-value">--</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript for device control -->
+  <script>
+    function updateSetpoint() {
+      const setpoint = document.getElementById('setpoint-input').value;
+      
+      fetch('{% url "update_setpoint" %}', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({ setpoint: parseFloat(setpoint) })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          showNotification('✓ ' + data.message, 'success');
+        } else {
+          showNotification('✗ Error: ' + data.error, 'error');
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        showNotification('✗ Network error', 'error');
+      });
+    }
+
+    function controlDevice(device, action) {
+      fetch('{% url "control_device" %}', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({ device: device, action: action })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          showNotification('✓ ' + data.message, 'success');
+          // Reload page after 1 second to show updated status
+          setTimeout(() => location.reload(), 1000);
+        } else {
+          showNotification('✗ Error: ' + data.error, 'error');
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        showNotification('✗ Network error', 'error');
+      });
+    }
+
+    function showNotification(message, type) {
+      const notification = document.createElement('div');
+      notification.className = `notification ${type}`;
+      notification.textContent = message;
+      document.body.appendChild(notification);
+      
+      setTimeout(() => notification.remove(), 3000);
+    }
+
+    // Auto-refresh data every 30 seconds
+    setInterval(() => {
+      location.reload();
+    }, 30000);
+  </script>
+</body>
+</html>

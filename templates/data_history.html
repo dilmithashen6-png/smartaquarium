@@ -1,0 +1,91 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Data History - Smart Aquarium</title>
+  <link rel="stylesheet" type="text/css" href="{% static 'css/dashboard.css' %}">
+</head>
+<body>
+  <div class="dashboard-container">
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+      <div class="navbar-content">
+        <h1 class="navbar-title">🐟 Smart Aquarium Control</h1>
+        <ul class="navbar-menu">
+          <li><a href="{% url 'admin_dashboard' %}">Dashboard</a></li>
+          <li><a href="{% url 'data_history' %}" class="active">History</a></li>
+          <li><a href="{% url 'logout' %}">Logout</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <div class="page-header">
+        <h2>Sensor Data History</h2>
+        <p class="welcome-text">View all recorded temperature and humidity readings</p>
+      </div>
+
+      <!-- Data Table Section -->
+      <div class="data-section">
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Date & Time</th>
+                <th>Temperature (°C)</th>
+                <th>Humidity (%)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for data in page_obj %}
+                <tr>
+                  <td>{{ data.timestamp|date:"M d, Y H:i:s" }}</td>
+                  <td class="temperature-value">{{ data.temperature }}</td>
+                  <td class="humidity-value">{{ data.humidity }}</td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="3" class="no-data">No data available</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+        <div class="pagination">
+          {% if page_obj.has_previous %}
+            <a href="?page=1" class="page-link">« First</a>
+            <a href="?page={{ page_obj.previous_page_number }}" class="page-link">‹ Previous</a>
+          {% endif %}
+
+          <span class="page-info">
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+          </span>
+
+          {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}" class="page-link">Next ›</a>
+            <a href="?page={{ page_obj.paginator.num_pages }}" class="page-link">Last »</a>
+          {% endif %}
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Export Section -->
+      <div class="export-section">
+        <h3>📥 Export Data</h3>
+        <p>Coming soon: Export data as CSV or PDF</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Auto-refresh data every 30 seconds
+    setInterval(() => {
+      location.reload();
+    }, 30000);
+  </script>
+</body>
+</html>

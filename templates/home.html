@@ -1,0 +1,25 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Smart Aquarium Control System</title>
+  <link rel="stylesheet" type="text/css" href="{% static 'css/home.css' %}">
+</head>
+<body>
+  <div class="container">
+    <img src="{% static 'img/logo.png' %}" alt="Logo" class="logo">
+    <h1>Smart Aquarium Control System</h1>
+    
+    <div class="button-group">
+      <a href="{% url 'public_dashboard' %}" class="btn btn-primary">
+        <i class="icon">📊</i> View Dashboard
+      </a>
+      <a href="{% url 'login' %}" class="btn btn-secondary">
+        <i class="icon">🔐</i> Admin Login
+      </a>
+    </div>
+    
+    <p class="info-text">Monitor and control your aquarium temperature in real-time</p>
+  </div>
+</body>
+</html>

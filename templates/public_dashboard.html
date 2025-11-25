@@ -1,0 +1,128 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Dashboard - Smart Aquarium</title>
+  <link rel="stylesheet" type="text/css" href="{% static 'css/dashboard.css' %}">
+</head>
+<body>
+  <div class="dashboard-container">
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+      <div class="navbar-content">
+        <h1 class="navbar-title">🐟 Smart Aquarium Control</h1>
+        <ul class="navbar-menu">
+          <li><a href="{% url 'public_dashboard' %}" class="active">Dashboard</a></li>
+          <li><a href="{% url 'home' %}">Home</a></li>
+          <li><a href="{% url 'login' %}">Admin Login</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <div class="page-header">
+        <h2>Aquarium Status</h2>
+        <p class="welcome-text">Live monitoring of your aquarium environment</p>
+      </div>
+
+      <!-- Status Section -->
+      <div class="status-section">
+        <h3>📊 Current Status</h3>
+        
+        <div class="status-grid">
+          <!-- Temperature Card -->
+          <div class="status-card temperature">
+            <div class="card-icon">🌡️</div>
+            <div class="card-content">
+              <h4>Temperature</h4>
+              {% if latest_sensor %}
+                <p class="value">{{ latest_sensor.temperature }}°C</p>
+                <p class="timestamp">{{ latest_sensor.timestamp|date:"M d, Y H:i" }}</p>
+              {% else %}
+                <p class="value">--</p>
+                <p class="timestamp">No data available</p>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Humidity Card -->
+          <div class="status-card humidity">
+            <div class="card-icon">💧</div>
+            <div class="card-content">
+              <h4>Humidity</h4>
+              {% if latest_sensor %}
+                <p class="value">{{ latest_sensor.humidity }}%</p>
+                <p class="timestamp">{{ latest_sensor.timestamp|date:"M d, Y H:i" }}</p>
+              {% else %}
+                <p class="value">--</p>
+                <p class="timestamp">No data available</p>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Fan Status Card -->
+          <div class="status-card device-card">
+            <div class="card-icon">💨</div>
+            <div class="card-content">
+              <h4>Fan</h4>
+              {% for device in devices %}
+                {% if device.device == 'fan' %}
+                  <p class="value {% if device.is_on %}on{% else %}off{% endif %}">
+                    {% if device.is_on %}ON{% else %}OFF{% endif %}
+                  </p>
+                {% endif %}
+              {% empty %}
+                <p class="value off">OFF</p>
+              {% endfor %}
+            </div>
+          </div>
+
+          <!-- Heater Status Card -->
+          <div class="status-card device-card">
+            <div class="card-icon">🔥</div>
+            <div class="card-content">
+              <h4>Heater</h4>
+              {% for device in devices %}
+                {% if device.device == 'heater' %}
+                  <p class="value {% if device.is_on %}on{% else %}off{% endif %}">
+                    {% if device.is_on %}ON{% else %}OFF{% endif %}
+                  </p>
+                {% endif %}
+              {% empty %}
+                <p class="value off">OFF</p>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Information Section -->
+      <div class="info-section">
+        <h3>ℹ️ Information</h3>
+        <div class="info-card">
+          <h4>Temperature Setpoint</h4>
+          {% if setpoint %}
+            <p class="info-value">{{ setpoint.setpoint_temperature }}°C</p>
+            <p class="info-detail">Last updated: {{ setpoint.updated_at|date:"M d, Y H:i" }}</p>
+          {% else %}
+            <p class="info-value">Not set</p>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Auto-refresh note -->
+      <div class="footer-note">
+        <p>📱 This dashboard auto-refreshes every 30 seconds</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Auto-refresh data every 30 seconds
+    setInterval(() => {
+      location.reload();
+    }, 30000);
+  </script>
+</body>
+</html>
